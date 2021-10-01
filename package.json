@@ -1,0 +1,13 @@
+{
+  "name": "ton-compiler",
+  "version": "1.0.0",
+  "description": "TON compiler binaries",
+  "main": "index.js",
+  "repository": "https://github.com/ex3ndr/ton-compiler.git",
+  "author": "Steve Korshakov <steve@korshakov.com>",
+  "license": "MIT",
+  "bin": {
+    "func": "./bin/func",
+    "fift": "./bin/fift"
+  }
+}

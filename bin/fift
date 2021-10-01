@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# stdlib
+SCRIPT_PATH="`dirname \"$0\"`"
+export FIFTPATH="$SCRIPT_PATH/../fiftlib"
+
+# run
+./macos/fift $@
