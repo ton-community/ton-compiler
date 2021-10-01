@@ -1,4 +1,4 @@
-# TON CLI
+# TON COMPILER
 
 [![Version npm](https://img.shields.io/npm/v/ton-compiler.svg?logo=npm)](https://www.npmjs.com/package/ton-compiler)
 
