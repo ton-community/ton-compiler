@@ -1,2 +1,14 @@
-#!/bin/bash
-./macos/func $@
+#!/usr/bin/env node
+
+// Execute
+const path = require('path');
+const child = require('child_process');
+const fiftPath = path.resolve(__dirname, 'macos', 'func');
+const [, , ...argv] = process.argv;
+try {
+    child.execSync(fiftPath + ' ' + argv.join(' '), {
+        stdio: 'inherit'
+    });
+} catch (e) {
+    process.exit(1);
+}

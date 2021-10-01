@@ -1,8 +1,17 @@
-#!/bin/bash
+#!/usr/bin/env node
 
-# stdlib
-SCRIPT_PATH="`dirname \"$0\"`"
-export FIFTPATH="$SCRIPT_PATH/../fiftlib"
+// stdlib
+const path = require('path');
+process.env['FIFTPATH'] = path.resolve(__dirname, '..', 'fiftlib');
 
-# run
-./macos/fift $@
+// Execute
+const child = require('child_process');
+const fiftPath = path.resolve(__dirname, 'macos', 'fift');
+const [, , ...argv] = process.argv;
+try {
+    child.execSync(fiftPath + ' ' + argv.join(' '), {
+        stdio: 'inherit'
+    });
+} catch (e) {
+    process.exit(1);
+}

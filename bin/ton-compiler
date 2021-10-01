@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+const fs = require('fs');
+const compiler = require('../dist/');
+const arg = require('arg');
+
+const args = arg({
+    '--input': String,
+    '--output': String,
+    '--fift': Boolean
+});
+
+if (!args['--output'] || !args['--input']) {
+    console.log('USAGE: ton-compiler [--fift] --input <input_file> --output <output_file>');
+    return;
+}
+
+let source = fs.readFileSync(args['--input'], 'utf-8');
+(async () => {
+    try {
+        let res = await compiler.compileFunc(source);
+        if (args['--fift']) {
+            fs.writeFileSync(args['--output'], res.fift, 'utf-8');
+        } else {
+            fs.writeFileSync(args['--output'], res.cell);
+        }
+    } catch (e) {
+        process.exit(0);
+    }
+})();
