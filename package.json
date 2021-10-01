@@ -6,6 +6,7 @@
   "repository": "https://github.com/ex3ndr/ton-compiler.git",
   "author": "Steve Korshakov <steve@korshakov.com>",
   "license": "MIT",
+  "files": ["bin/**/*","fiftlib/**/*"],
   "bin": {
     "func": "./bin/func",
     "fift": "./bin/fift"
