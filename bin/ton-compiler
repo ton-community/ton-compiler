@@ -4,17 +4,17 @@ const compiler = require('../dist/');
 const arg = require('arg');
 
 const args = arg({
-    '--input': String,
+    '--input': [String],
     '--output': String,
     '--fift': Boolean
 });
 
-if (!args['--output'] || !args['--input']) {
+if (!args['--output'] || args['--input'].length === 0) {
     console.log('USAGE: ton-compiler [--fift] --input <input_file> --output <output_file>');
     return;
 }
 
-let source = fs.readFileSync(args['--input'], 'utf-8');
+let source = args['--input'].map((v) => fs.readFileSync(v, 'utf-8')).join('\n');
 (async () => {
     try {
         let res = await compiler.compileFunc(source);
