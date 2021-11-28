@@ -2,8 +2,11 @@
 
 // Execute
 const path = require('path');
+const os = require('os');
 const child = require('child_process');
-const fiftPath = path.resolve(__dirname, 'macos', 'func');
+const arch = os.arch();
+const fiftPath = path.resolve(__dirname, 'macos',  arch === 'arm64' ? 'func-arm64' : 'func');
+console.log(fiftPath);
 const [, , ...argv] = process.argv;
 try {
     child.execSync(fiftPath + ' ' + argv.join(' '), {

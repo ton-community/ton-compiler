@@ -1,7 +1,10 @@
 import * as tmp from 'tmp';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import * as child from 'child_process';
+
+const arch = os.arch();
 
 async function createTempFile() {
     return await new Promise<{ name: string, removeCallback: () => void }>((resolve, reject) => {
@@ -51,14 +54,14 @@ async function readFileBuffer(name: string) {
 }
 
 export function executeFunc(args: string[]) {
-    const fiftPath = path.resolve(__dirname, '..', 'bin', 'macos', 'func');
+    const fiftPath = path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'func-arm64' : 'func');
     child.execSync(fiftPath + ' ' + args.join(' '), {
         stdio: 'inherit'
     });
 }
 
 export function executeFift(args: string[]) {
-    const fiftPath = path.resolve(__dirname, '..', 'bin', 'macos', 'fift');
+    const fiftPath = path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
     child.execSync(fiftPath + ' ' + args.join(' '), {
         stdio: 'inherit',
         env: {
