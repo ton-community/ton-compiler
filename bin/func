@@ -5,11 +5,13 @@ const path = require('path');
 const os = require('os');
 const child = require('child_process');
 const arch = os.arch();
-const fiftPath = path.resolve(__dirname, 'macos',  arch === 'arm64' ? 'func-arm64' : 'func');
-console.log(fiftPath);
+const platform = os.platform()
+const commandSuffix = platform === "win32" ? ".exe" : "";
+const command = (arch === 'arm64' ? 'func-arm64' : 'func') + commandSuffix;
+const funcPath = path.resolve(__dirname, platform, command);
 const [, , ...argv] = process.argv;
 try {
-    child.execSync(fiftPath + ' ' + argv.join(' '), {
+    child.execSync(funcPath + ' ' + argv.join(' '), {
         stdio: 'inherit'
     });
 } catch (e) {

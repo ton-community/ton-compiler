@@ -8,7 +8,11 @@ process.env['FIFTPATH'] = path.resolve(__dirname, '..', 'fiftlib');
 // Execute
 const arch = os.arch();
 const child = require('child_process');
-const fiftPath = path.resolve(__dirname, 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
+const platform = os.platform()
+const commandSuffix = platform === "win32" ? ".exe" : "";
+const command = (arch === 'arm64' ? 'fift-arm64' : 'fift') + commandSuffix;
+const fiftPath = path.resolve(__dirname, platform, command);
+
 const [, , ...argv] = process.argv;
 try {
     child.execSync(fiftPath + ' ' + argv.join(' '), {
