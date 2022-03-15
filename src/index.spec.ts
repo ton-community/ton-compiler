@@ -1,4 +1,4 @@
-import { compileFunc } from ".";
+import { compileFift, compileFunc } from ".";
 
 const testContract = `
 ;; Simple wallet smart contract
@@ -31,7 +31,8 @@ const testContract = `
 describe('ton-compiler', () => {
     it('should compile source', async () => {
         let compiled = await compileFunc(testContract);
-        expect(compiled.fift).toMatchSnapshot();
-        expect(compiled.cell.toString('hex')).toEqual('b5ee9c7201010401004f000114ff00f4a413f4bcf2c80b0102012002030004d230006ef28308d71820d31fed44d0d31fd3ffd15131baf2a103f901541042f910f2a2f8005120d74a96d307d402fb00ded1a4c8cb1fcbffc9ed54');
+        expect(compiled).toMatchSnapshot();
+        let cell = await compileFift(compiled);
+        expect(cell.toString('hex')).toEqual('b5ee9c7201010401004f000114ff00f4a413f4bcf2c80b0102012002030004d230006ef28308d71820d31fed44d0d31fd3ffd15131baf2a103f901541042f910f2a2f8005120d74a96d307d402fb00ded1a4c8cb1fcbffc9ed54');
     });
 });

@@ -8,9 +8,9 @@ const arch = os.arch();
 const platform = os.platform()
 const commandSuffix = platform === "win32" ? ".exe" : "";
 
-async function createTempFile() {
+async function createTempFile(postfix: string) {
     return await new Promise<{ name: string, removeCallback: () => void }>((resolve, reject) => {
-        tmp.file((err, name, fd, removeCallback) => {
+        tmp.file({ postfix }, (err, name, fd, removeCallback) => {
             if (err) {
                 reject(err);
             } else {
@@ -74,32 +74,36 @@ export function executeFift(args: string[]) {
     });
 }
 
-export async function compileFunc(source: string): Promise<{ fift: string, cell: Buffer }> {
-    let sourceFile = await createTempFile();
-    let fiftFile = await createTempFile();
-    let fiftOpFile = await createTempFile();
-    let cellFile = await createTempFile();
+export async function compileFunc(source: string): Promise<string> {
+    let sourceFile = await createTempFile('.fc');
+    let fiftFile = await createTempFile('.fif');
     let funcLib = path.resolve(__dirname, '..', 'funclib', 'stdlib.fc');
     try {
         await writeFile(sourceFile.name, source);
-
-        // Func -> Fift
         executeFunc(['-PS', '-o', fiftFile.name, funcLib, sourceFile.name]);
         let fiftContent = await readFile(fiftFile.name);
-        fiftContent = fiftContent.substr(fiftContent.indexOf('\n') + 1); // Remove first line
-
-        // Fift -> Boc
-        fs.writeFileSync(fiftOpFile.name, `
-        "Asm.fif" include
-        ${fiftContent}
-        boc>B "${cellFile.name}" B>file`, 'utf-8');
-        executeFift([fiftOpFile.name]);
-        let cell = await readFileBuffer(cellFile.name);
-
-        return {fift: fiftContent, cell: cell};
+        fiftContent = fiftContent.slice(fiftContent.indexOf('\n') + 1); // Remove first line
+        return fiftContent;
     } finally {
         sourceFile.removeCallback();
         fiftFile.removeCallback();
+    }
+}
+
+export async function compileFift(source: string): Promise<Buffer> {
+    let fiftOpFile = await createTempFile('.fif');
+    let cellFile = await createTempFile('.cell');
+    try {
+        let body = '';
+        body += `"Asm.fif" include\n`;
+        body += source;
+        body += '\n';
+        body += `boc>B "${cellFile.name}" B>file`;
+        fs.writeFileSync(fiftOpFile.name, body, 'utf-8');
+        executeFift([fiftOpFile.name]);
+        return await readFileBuffer(cellFile.name);
+    } finally {
         fiftOpFile.removeCallback();
+        cellFile.removeCallback();
     }
 }

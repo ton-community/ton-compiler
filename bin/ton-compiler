@@ -6,7 +6,8 @@ const arg = require('arg');
 const args = arg({
     '--input': [String],
     '--output': String,
-    '--fift': Boolean
+    '--fift': Boolean,
+    '--optimizations': Number
 });
 
 if (!args['--output'] || args['--input'].length === 0) {
@@ -17,13 +18,14 @@ if (!args['--output'] || args['--input'].length === 0) {
 let source = args['--input'].map((v) => fs.readFileSync(v, 'utf-8')).join('\n');
 (async () => {
     try {
-        let res = await compiler.compileFunc(source);
         if (args['--fift']) {
-            fs.writeFileSync(args['--output'], res.fift, 'utf-8');
+            let res = await compiler.compileFift(source);
+            fs.writeFileSync(args['--output'], res, 'utf-8');
         } else {
-            fs.writeFileSync(args['--output'], res.cell);
+            let res = await compiler.compileFunc(source);
+            fs.writeFileSync(args['--output'], res);
         }
     } catch (e) {
-        process.exit(0);
+        process.exit(1);
     }
 })();
