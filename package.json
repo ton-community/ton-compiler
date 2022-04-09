@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "TON compiler binaries",
   "main": "dist/index.js",
-  "repository": "https://github.com/ex3ndr/ton-compiler.git",
+  "repository": "https://github.com/ton-foundation/ton-compiler.git",
   "author": "Steve Korshakov <steve@korshakov.com>",
   "license": "MIT",
   "files": [
