@@ -39,10 +39,12 @@ ton-compiler --input ./wallet.fc --output ./wallet.fif --fift
 ## Programmatic use
 
 ```typescript
-import { compileFunc } from "ton-compiler";
-let compiled = await compileFunc("source code");
-console.log(compiled.fift); // Compiled Fift assembler
-console.log(compiled.cell.toString('hex')); // Compiled cell
+import { compileFunc, compileFift } from "ton-compiler";
+let fift = await compileFunc("source code");
+console.log(fift); // Compiled Fift assembler
+
+let cell = compileFift(fift);
+console.log(cell.toString('hex')); // Compiled cell
 ```
 
 # License
