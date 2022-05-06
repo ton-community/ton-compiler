@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import * as child from 'child_process';
+import which from 'which';
 
 const arch = os.arch();
 
@@ -53,15 +54,23 @@ async function readFileBuffer(name: string) {
     })
 }
 
-export function executeFunc(args: string[]) {
-    const fiftPath = path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'func-arm64' : 'func');
-    child.execSync(fiftPath + ' ' + args.join(' '), {
+export function executeFunc(args: string[], onlyBundled: Boolean) {
+    let sys;
+    if (!onlyBundled) {
+        sys = which.sync('func', {nothrow: true});
+    }
+    const funcPath = sys || path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'func-arm64' : 'func');
+    child.execSync(funcPath + ' ' + args.join(' '), {
         stdio: 'inherit'
     });
 }
 
-export function executeFift(args: string[]) {
-    const fiftPath = path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
+export function executeFift(args: string[], onlyBundled: Boolean) {
+    let sys;
+    if (!onlyBundled) {
+        sys = which.sync('fift', {nothrow: true});
+    }
+    const fiftPath = sys || path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
     child.execSync(fiftPath + ' ' + args.join(' '), {
         stdio: 'inherit',
         env: {
@@ -70,13 +79,13 @@ export function executeFift(args: string[]) {
     });
 }
 
-export async function compileFunc(source: string): Promise<string> {
+export async function compileFunc(source: string, onlyBundled: Boolean = false): Promise<string> {
     let sourceFile = await createTempFile('.fc');
     let fiftFile = await createTempFile('.fif');
     let funcLib = path.resolve(__dirname, '..', 'funclib', 'stdlib.fc');
     try {
         await writeFile(sourceFile.name, source);
-        executeFunc(['-PS', '-o', fiftFile.name, funcLib, sourceFile.name]);
+        executeFunc(['-PS', '-o', fiftFile.name, funcLib, sourceFile.name], onlyBundled);
         let fiftContent = await readFile(fiftFile.name);
         fiftContent = fiftContent.slice(fiftContent.indexOf('\n') + 1); // Remove first line
         return fiftContent;
@@ -86,7 +95,7 @@ export async function compileFunc(source: string): Promise<string> {
     }
 }
 
-export async function compileFift(source: string): Promise<Buffer> {
+export async function compileFift(source: string, onlyBundled: Boolean = false): Promise<Buffer> {
     let fiftOpFile = await createTempFile('.fif');
     let cellFile = await createTempFile('.cell');
     try {
@@ -96,7 +105,7 @@ export async function compileFift(source: string): Promise<Buffer> {
         body += '\n';
         body += `boc>B "${cellFile.name}" B>file`;
         fs.writeFileSync(fiftOpFile.name, body, 'utf-8');
-        executeFift([fiftOpFile.name]);
+        executeFift([fiftOpFile.name], onlyBundled);
         return await readFileBuffer(cellFile.name);
     } finally {
         fiftOpFile.removeCallback();

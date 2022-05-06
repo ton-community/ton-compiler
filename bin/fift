@@ -8,7 +8,17 @@ process.env['FIFTPATH'] = path.resolve(__dirname, '..', 'fiftlib');
 // Execute
 const arch = os.arch();
 const child = require('child_process');
-const fiftPath = path.resolve(__dirname, 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
+const which = require('which');
+const arg = require('arg');
+
+const args = arg({
+    '--onlyBundled': Boolean,
+})
+let sys;
+if (!args['--onlyBundled']) {
+    sys = which.sync('fift', {nothrow: true});
+}
+const fiftPath = sys || path.resolve(__dirname, 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
 const [, , ...argv] = process.argv;
 try {
     child.execSync(fiftPath + ' ' + argv.join(' '), {

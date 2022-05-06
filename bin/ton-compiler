@@ -7,7 +7,8 @@ const args = arg({
     '--input': [String],
     '--output': String,
     '--fift': Boolean,
-    '--optimizations': Number
+    '--optimizations': Number,
+    '--onlyBundled': Boolean,
 });
 
 if (!args['--output'] || args['--input'].length === 0) {
@@ -19,10 +20,10 @@ let source = args['--input'].map((v) => fs.readFileSync(v, 'utf-8')).join('\n');
 (async () => {
     try {
         if (args['--fift']) {
-            let res = await compiler.compileFift(source);
+            let res = await compiler.compileFift(source, args['--onlyBundled']);
             fs.writeFileSync(args['--output'], res, 'utf-8');
         } else {
-            let res = await compiler.compileFunc(source);
+            let res = await compiler.compileFunc(source, args['--onlyBundled']);
             fs.writeFileSync(args['--output'], res);
         }
     } catch (e) {

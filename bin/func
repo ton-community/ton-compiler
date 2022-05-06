@@ -5,11 +5,21 @@ const path = require('path');
 const os = require('os');
 const child = require('child_process');
 const arch = os.arch();
-const fiftPath = path.resolve(__dirname, 'macos',  arch === 'arm64' ? 'func-arm64' : 'func');
-console.log(fiftPath);
+const which = require('which');
+const arg = require('arg');
+
+const args = arg({
+    '--onlyBundled': Boolean,
+})
+let sys;
+if (!args['--onlyBundled']) {
+    sys = which.sync('func', {nothrow: true});
+}
+const funcPath = sys || path.resolve(__dirname, 'macos',  arch === 'arm64' ? 'func-arm64' : 'func');
+console.log(funcPath);
 const [, , ...argv] = process.argv;
 try {
-    child.execSync(fiftPath + ' ' + argv.join(' '), {
+    child.execSync(funcPath + ' ' + argv.join(' '), {
         stdio: 'inherit'
     });
 } catch (e) {
