@@ -11,11 +11,12 @@ const arg = require('arg');
 const args = arg({
     '--onlyBundled': Boolean,
 })
-let sys;
+let installedBinary;
 if (!args['--onlyBundled']) {
-    sys = which.sync('func', {nothrow: true});
+    const binPath = which.sync('func', {nothrow: true, all: true})
+    if (binPath) installedBinary = binPath.filter(x => !x.includes("node_modules/.bin"))[0];
 }
-const funcPath = sys || path.resolve(__dirname, 'macos',  arch === 'arm64' ? 'func-arm64' : 'func');
+const funcPath = installedBinary || path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'func-arm64' : 'func');
 console.log(funcPath);
 const [, , ...argv] = process.argv;
 try {

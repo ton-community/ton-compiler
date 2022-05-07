@@ -9,11 +9,11 @@ const arch = os.arch();
 
 async function createTempFile(postfix: string) {
     return await new Promise<{ name: string, removeCallback: () => void }>((resolve, reject) => {
-        tmp.file({ postfix }, (err, name, fd, removeCallback) => {
+        tmp.file({postfix}, (err, name, fd, removeCallback) => {
             if (err) {
                 reject(err);
             } else {
-                resolve({ name, removeCallback });
+                resolve({name, removeCallback});
             }
         });
     });
@@ -42,6 +42,7 @@ async function readFile(name: string) {
         });
     })
 }
+
 async function readFileBuffer(name: string) {
     return await new Promise<Buffer>((resolve, reject) => {
         fs.readFile(name, (e, d) => {
@@ -55,22 +56,24 @@ async function readFileBuffer(name: string) {
 }
 
 export function executeFunc(args: string[], onlyBundled: Boolean) {
-    let sys;
+    let installedBinary: string | undefined;
     if (!onlyBundled) {
-        sys = which.sync('func', {nothrow: true});
+        const binPath = which.sync('func', {nothrow: true, all: true})
+        if (binPath) installedBinary = binPath.filter(x => !x.includes("node_modules/.bin"))[0];
     }
-    const funcPath = sys || path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'func-arm64' : 'func');
+    const funcPath = installedBinary || path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'func-arm64' : 'func');
     child.execSync(funcPath + ' ' + args.join(' '), {
         stdio: 'inherit'
     });
 }
 
 export function executeFift(args: string[], onlyBundled: Boolean) {
-    let sys;
+    let installedBinary: string | undefined;
     if (!onlyBundled) {
-        sys = which.sync('fift', {nothrow: true});
+        const binPath = which.sync('fift', {nothrow: true, all: true});
+        if (binPath) installedBinary = binPath.filter(x => !x.includes("node_modules/.bin"))[0];
     }
-    const fiftPath = sys || path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
+    const fiftPath = installedBinary || path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
     child.execSync(fiftPath + ' ' + args.join(' '), {
         stdio: 'inherit',
         env: {

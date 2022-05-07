@@ -14,11 +14,12 @@ const arg = require('arg');
 const args = arg({
     '--onlyBundled': Boolean,
 })
-let sys;
+let installedBinary;
 if (!args['--onlyBundled']) {
-    sys = which.sync('fift', {nothrow: true});
+    const binPath = which.sync('fift', {nothrow: true, all: true});
+    if (binPath) installedBinary = binPath.filter(x => !x.includes("node_modules/.bin"))[0];
 }
-const fiftPath = sys || path.resolve(__dirname, 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
+const fiftPath = installedBinary || path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
 const [, , ...argv] = process.argv;
 try {
     child.execSync(fiftPath + ' ' + argv.join(' '), {

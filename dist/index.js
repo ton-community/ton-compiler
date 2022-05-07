@@ -145,22 +145,26 @@ function readFileBuffer(name) {
     });
 }
 function executeFunc(args, onlyBundled) {
-    var sys;
+    var installedBinary;
     if (!onlyBundled) {
-        sys = which_1.default.sync('func', { nothrow: true });
+        var binPath = which_1.default.sync('func', { nothrow: true, all: true });
+        if (binPath)
+            installedBinary = binPath.filter(function (x) { return !x.includes("node_modules/.bin"); })[0];
     }
-    var funcPath = sys || path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'func-arm64' : 'func');
+    var funcPath = installedBinary || path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'func-arm64' : 'func');
     child.execSync(funcPath + ' ' + args.join(' '), {
         stdio: 'inherit'
     });
 }
 exports.executeFunc = executeFunc;
 function executeFift(args, onlyBundled) {
-    var sys;
+    var installedBinary;
     if (!onlyBundled) {
-        sys = which_1.default.sync('fift', { nothrow: true });
+        var binPath = which_1.default.sync('fift', { nothrow: true, all: true });
+        if (binPath)
+            installedBinary = binPath.filter(function (x) { return !x.includes("node_modules/.bin"); })[0];
     }
-    var fiftPath = sys || path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
+    var fiftPath = installedBinary || path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
     child.execSync(fiftPath + ' ' + args.join(' '), {
         stdio: 'inherit',
         env: {

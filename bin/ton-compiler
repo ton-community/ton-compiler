@@ -12,7 +12,7 @@ const args = arg({
 });
 
 if (!args['--output'] || args['--input'].length === 0) {
-    console.log('USAGE: ton-compiler [--fift] --input <input_file> --output <output_file>');
+    console.log('USAGE: ton-compiler [--fift] --input <input_file> --output <output_file> [--onlyBundled]');
     return;
 }
 
