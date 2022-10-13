@@ -46,13 +46,16 @@ ton-compiler --input ./wallet.fc --output ./wallet.cell --output-fift ./wallet.f
 
 # Disable stdlib
 ton-compiler --no-stdlib --input ./wallet.fc --output ./wallet.cell --output-fift ./wallet.fif
+
+# Pick version
+ton-compiler --version "legacy" --input ./wallet.fc --output ./wallet.cell --output-fift ./wallet.fif
 ```
 
 ## Programmatic use
 
 ```typescript
 import { compileContract } from "ton-compiler";
-let result = await compileContract({ code: "source code", stdlib: true });
+let result = await compileContract({ code: 'source code', stdlib: true, version: 'latest' });
 if (result.ok) {
   console.log(result.fift); // Compiled Fift assembler
   console.log(result.cell); // Compiled cell in base64
