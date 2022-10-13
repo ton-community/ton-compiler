@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import * as child from 'child_process';
+import { cutFirstLine } from "./utils/cutFirstLine";
 
 const arch = os.arch();
 
@@ -54,10 +55,10 @@ async function readFileBuffer(name: string) {
     })
 }
 
-async function executeFunc(args: string[]) {
+async function executeFunc(args: string[], workdir: string) {
     const fiftPath = path.resolve(__dirname, '..', '..', 'bin', 'distrib', 'legacy', 'macos', arch === 'arm64' ? 'func-arm64' : 'func');
     try {
-        let res = child.execSync(fiftPath + ' ' + args.join(' '));
+        let res = child.execSync(fiftPath + ' ' + args.join(' '), { cwd: workdir });
         return {
             ok: true,
             log: res.toString() as string
@@ -70,10 +71,11 @@ async function executeFunc(args: string[]) {
     }
 }
 
-async function executeFift(args: string[]) {
+async function executeFift(args: string[], workdir: string) {
     const fiftPath = path.resolve(__dirname, '..', '..', 'bin', 'distrib', 'legacy', 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
     try {
         let res = child.execSync(fiftPath + ' ' + args.join(' '), {
+            cwd: workdir,
             env: {
                 FIFTPATH: path.resolve(__dirname, '..', '..', 'bin', 'distrib', 'legacy')
             }
@@ -90,7 +92,7 @@ async function executeFift(args: string[]) {
     }
 }
 
-export async function legacyBuild(opts: { files: string[], stdlib: boolean }): Promise<CompilationResult> {
+export async function legacyBuild(opts: { files: string[], stdlib: boolean, workdir: string }): Promise<CompilationResult> {
     if (os.type() !== 'Darwin') {
         throw Error('Legacy builds are supported only on MacOS');
     }
@@ -107,14 +109,14 @@ export async function legacyBuild(opts: { files: string[], stdlib: boolean }): P
         for (let f of opts.files) {
             args.push(f);
         }
-        let funcOutput = await executeFunc(args);
+        let funcOutput = await executeFunc(args, opts.workdir);
         if (!funcOutput.ok) {
             return { ok: false, log: funcOutput.log, fift: null, output: null };
         } else {
             logs = funcOutput.log
         }
         fiftContent = await readFile(fiftFile.name);
-        fiftContent = fiftContent.slice(fiftContent.indexOf('\n') + 1); // Remove first line
+        fiftContent = cutFirstLine(fiftContent); // Remove first line
     } finally {
         fiftFile.removeCallback();
     }
@@ -130,7 +132,7 @@ export async function legacyBuild(opts: { files: string[], stdlib: boolean }): P
         body += '\n';
         body += `boc>B "${cellFile.name}" B>file`;
         fs.writeFileSync(fiftOpFile.name, body, 'utf-8');
-        let fiftOutput = await executeFift([fiftOpFile.name]);
+        let fiftOutput = await executeFift([fiftOpFile.name], opts.workdir);
         if (!fiftOutput.ok) {
             return { ok: false, log: fiftOutput.log, fift: fiftContent, output: null };
         } else {

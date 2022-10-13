@@ -6,24 +6,29 @@ const arg = require('arg');
 const args = arg({
     '--input': [String],
     '--output': String,
-    '--fift': Boolean,
-    '--optimizations': Number
+    '--output-fift': String,
+    '--version': String,
+    '--no-stdlib': Boolean
 });
 
-if (!args['--output'] || args['--input'].length === 0) {
-    console.log('USAGE: ton-compiler [--fift] --input <input_file> --output <output_file>');
+if ((!args['--output'] && !args['--output-fift']) || args['--input'].length === 0) {
+    console.log('USAGE: ton-compiler --input <input_file> --output <output_file> [--output-fift <output_file>] [--no-stdlib] [--version <version_name>]');
     return;
 }
 
-let source = args['--input'].map((v) => fs.readFileSync(v, 'utf-8')).join('\n');
 (async () => {
     try {
-        if (args['--fift']) {
-            let res = await compiler.compileFift(source);
-            fs.writeFileSync(args['--output'], res, 'utf-8');
+        let res = await compiler.compileContract({ files: args['--input'], stdlib: !args['--no-stdlib'], version: args['--version'] });
+        if (res.ok) {
+            if (args['--output']) {
+                fs.writeFileSync(args['--output'], res.output);
+            }
+            if (args['--output-fift']) {
+                fs.writeFileSync(args['--output-fift'], res.fift, 'utf-8');
+            }
         } else {
-            let res = await compiler.compileFunc(source);
-            fs.writeFileSync(args['--output'], res);
+            console.warn(res.log);
+            process.exit(1);
         }
     } catch (e) {
         process.exit(1);
