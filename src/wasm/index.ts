@@ -1,8 +1,8 @@
-import {base64Decode} from "./utils";
+import { base64Decode } from "../engines/utils/base64Decode";
 
-const CompilerModule = require('../../bin/v2022.10/wasm/funcfiftlib.js');
+const CompilerModule = require('../../bin/distrib/v2022.10/funcfiftlib.js');
 
-const { FuncFiftLibWasm } = require('../../bin/v2022.10/wasm/funcfiftlib.wasm.js')
+const { FuncFiftLibWasm } = require('../../bin/distrib/v2022.10/funcfiftlib.wasm.js')
 
 // Prepare binary
 const WasmBinary = base64Decode(FuncFiftLibWasm)

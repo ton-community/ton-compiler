@@ -8,15 +8,10 @@
   "license": "MIT",
   "files": [
     "dist/**/*",
-    "bin/**/*",
-    "fiftlib/**/*",
-    "funclib/**/*"
+    "bin/**/*"
   ],
   "bin": {
-    "fift": "./bin/fift",
-    "func": "./bin/func",
-    "ton-compiler": "./bin/ton-compiler",
-    "ton-compiler-wasm": "./bin/ton-compiler-wasm"
+    "ton-compiler": "./bin/ton-compiler"
   },
   "scripts": {
     "release": "rm -fr dist && tsc && jest && yarn publish"
