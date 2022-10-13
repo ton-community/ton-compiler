@@ -58,7 +58,7 @@ import { compileContract } from "ton-compiler";
 let result = await compileContract({ code: 'source code', stdlib: true, version: 'latest' });
 if (result.ok) {
   console.log(result.fift); // Compiled Fift assembler
-  console.log(result.cell); // Compiled cell in base64
+  console.log(result.cell); // Compiled cell Buffer
 } else {
   console.warn(result.logs); // Output logs
 }
