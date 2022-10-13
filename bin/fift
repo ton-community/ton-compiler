@@ -3,12 +3,12 @@
 // stdlib
 const path = require('path');
 const os = require('os');
-process.env['FIFTPATH'] = path.resolve(__dirname, '..', 'fiftlib');
+process.env['FIFTPATH'] = path.resolve(__dirname, '..', 'fiftlib', 'classic');
 
 // Execute
 const arch = os.arch();
 const child = require('child_process');
-const fiftPath = path.resolve(__dirname, 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
+const fiftPath = path.resolve(__dirname, 'classic', 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
 const [, , ...argv] = process.argv;
 try {
     child.execSync(fiftPath + ' ' + argv.join(' '), {

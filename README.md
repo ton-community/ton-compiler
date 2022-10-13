@@ -23,7 +23,7 @@ yarn add ton-compiler
 This packages adds multiple binaries: func, fift and ton-compiler.
 
 - Fift compiler already have stdlib included
-- Func compiler need stdlib to be provided, you can use bundled-in: `./node_modules/ton-compioler/funclib/stdblib.fc`
+- Func compiler need stdlib to be provided, you can use bundled-in: `./node_modules/ton-compioler/funclib/classic/stdlib.fc`
 - Ton Compiler is a wrapper around them to be able to compile everything in one go
 
 ### Console Use
