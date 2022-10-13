@@ -8,9 +8,15 @@ BETA: right now works only on MacOS
 
 ## Features
 
+- ⭐️ Multiple func compiler versions
 - 🚀 Doesn't need to install and compile TON
 - 🍰 Programmatic and CLI interfaces
 - 💸 Ready to use in unit-testing
+
+## Supported Versions
+- `latest` (default) - by default library and cli use latest available compiler
+- `v2022.10`
+- `legacy` - Legacy compiler
 
 ## Install
 
@@ -33,18 +39,26 @@ This packages adds multiple binaries: func, fift and ton-compiler.
 ton-compiler --input ./wallet.fc --output ./wallet.cell
 
 # Compile to fift (useful for debuging)
-ton-compiler --input ./wallet.fc --output ./wallet.fif --fift
+ton-compiler --input ./wallet.fc --output-fift ./wallet.fif
+
+# Compile to fift and fift
+ton-compiler --input ./wallet.fc --output ./wallet.cell --output-fift ./wallet.fif
+
+# Disable stdlib
+ton-compiler --no-stdlib --input ./wallet.fc --output ./wallet.cell --output-fift ./wallet.fif
 ```
 
 ## Programmatic use
 
 ```typescript
-import { compileFunc, compileFift } from "ton-compiler";
-let fift = await compileFunc("source code");
-console.log(fift); // Compiled Fift assembler
-
-let cell = compileFift(fift);
-console.log(cell.toString('hex')); // Compiled cell
+import { compileContract } from "ton-compiler";
+let result = await compileContract({ code: "source code", stdlib: true });
+if (result.ok) {
+  console.log(result.fift); // Compiled Fift assembler
+  console.log(result.cell); // Compiled cell in base64
+} else {
+  console.warn(result.logs); // Output logs
+}
 ```
 
 # License
