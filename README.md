@@ -4,8 +4,6 @@
 
 Packaged Func compiler for TON smart contracts.
 
-BETA: right now works only on MacOS
-
 ## Features
 
 - ⭐️ Multiple func compiler versions
