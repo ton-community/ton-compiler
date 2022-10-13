@@ -13,9 +13,10 @@
     "funclib/**/*"
   ],
   "bin": {
-    "func": "./bin/func",
     "fift": "./bin/fift",
-    "ton-compiler": "./bin/ton-compiler"
+    "func": "./bin/func",
+    "ton-compiler": "./bin/ton-compiler",
+    "ton-compiler-wasm": "./bin/ton-compiler-wasm"
   },
   "scripts": {
     "release": "rm -fr dist && tsc && jest && yarn publish"

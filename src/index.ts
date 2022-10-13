@@ -54,18 +54,18 @@ async function readFileBuffer(name: string) {
 }
 
 export function executeFunc(args: string[]) {
-    const fiftPath = path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'func-arm64' : 'func');
+    const fiftPath = path.resolve(__dirname, '..', 'bin', 'classic', 'macos', arch === 'arm64' ? 'func-arm64' : 'func');
     child.execSync(fiftPath + ' ' + args.join(' '), {
         stdio: 'inherit'
     });
 }
 
 export function executeFift(args: string[]) {
-    const fiftPath = path.resolve(__dirname, '..', 'bin', 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
+    const fiftPath = path.resolve(__dirname, '..', 'bin', 'classic', 'macos', arch === 'arm64' ? 'fift-arm64' : 'fift');
     child.execSync(fiftPath + ' ' + args.join(' '), {
         stdio: 'inherit',
         env: {
-            FIFTPATH: path.resolve(__dirname, '..', 'fiftlib')
+            FIFTPATH: path.resolve(__dirname, '..', 'fiftlib', 'classic')
         }
     });
 }
@@ -73,7 +73,7 @@ export function executeFift(args: string[]) {
 export async function compileFunc(source: string): Promise<string> {
     let sourceFile = await createTempFile('.fc');
     let fiftFile = await createTempFile('.fif');
-    let funcLib = path.resolve(__dirname, '..', 'funclib', 'stdlib.fc');
+    let funcLib = path.resolve(__dirname, '..', 'funclib', 'classic', 'stdlib.fc');
     try {
         await writeFile(sourceFile.name, source);
         executeFunc(['-PS', '-o', fiftFile.name, funcLib, sourceFile.name]);

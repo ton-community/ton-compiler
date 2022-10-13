@@ -5,7 +5,7 @@ const path = require('path');
 const os = require('os');
 const child = require('child_process');
 const arch = os.arch();
-const fiftPath = path.resolve(__dirname, 'macos',  arch === 'arm64' ? 'func-arm64' : 'func');
+const fiftPath = path.resolve(__dirname, 'classic', 'macos',  arch === 'arm64' ? 'func-arm64' : 'func');
 console.log(fiftPath);
 const [, , ...argv] = process.argv;
 try {

@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+const fs = require('fs');
+const compiler = require('../dist/wasm');
+const arg = require('arg');
+
+const args = arg({
+    '--input': [String],
+    '--output': String,
+    '--fift': String,
+    '--optimizations': Number
+});
+
+if (!args['--output'] || args['--input'].length === 0) {
+    console.log('USAGE: ton-compiler-wasm [--fift <fift-output>] --input <input_file> --output <output_file>');
+    return;
+}
+
+(async () => {
+    let result = await compiler.compileFunc({
+        entryPoints: args['--input'],
+        fs: 'node',
+    });
+    if (result.status === 'error') {
+        console.error(result.message);
+        process.exit(1);
+    }
+    fs.writeFileSync(args.output, result.codeBoc);
+    if (args.fift) {
+        fs.writeFileSync(args.fift, result.fiftCode.replace(/\\n/g, '\n'));
+    }
+})();
