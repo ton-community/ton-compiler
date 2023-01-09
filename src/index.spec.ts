@@ -22,4 +22,12 @@ describe('ton-compiler', () => {
     let compiled = await compileContract({ files: [path.resolve(__dirname, 'tests', 'test_bug.fc')], version: 'v2022.10' });
     expect(compiled).toMatchSnapshot();
   });
+  it('should compile source with v2022.12 compiler', async () => {
+    let compiled = await compileContract({ files: [path.resolve(__dirname, 'tests', 'test.fc')], version: 'v2022.10' });
+    expect(compiled).toMatchSnapshot();
+  });
+  it('should compile with errors with v2022.12 compiler', async () => {
+    let compiled = await compileContract({ files: [path.resolve(__dirname, 'tests', 'test_bug.fc')], version: 'v2022.10' });
+    expect(compiled).toMatchSnapshot();
+  });
 });

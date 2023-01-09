@@ -6,6 +6,7 @@ import { wasmBuild } from "./engines/wasm";
 
 type Version =
     | 'v2022.10'
+    | 'v2022.12'
     | 'legacy'
 
 export async function compileContract(opts: { files: string[], version?: Version | 'latest', stdlib?: boolean | null | undefined, workdir?: string | null | undefined }): Promise<CompilationResult> {
@@ -17,7 +18,7 @@ export async function compileContract(opts: { files: string[], version?: Version
     }
 
     // Resolve version
-    let version: Version = 'v2022.10'; // Latest
+    let version: Version = 'v2022.12'; // Latest
     if (opts.version !== 'latest' && typeof opts.version === 'string') {
         version = opts.version;
     }
@@ -43,7 +44,7 @@ export async function compileContract(opts: { files: string[], version?: Version
     // Compile
     if (version === 'legacy') {
         return await legacyBuild({ files: files, stdlib, workdir });
-    } else if (version === 'v2022.10') {
+    } else if (version === 'v2022.10' || version === 'v2022.12') {
         return await wasmBuild({ files: files, version, stdlib, workdir });
     } else {
         throw Error('Unsupported compiler version ' + version);

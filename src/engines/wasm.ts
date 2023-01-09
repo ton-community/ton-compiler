@@ -7,6 +7,8 @@ import { unescape } from "./utils/unescape";
 // Compilators
 const CompilerModule_2022_10 = require('../../bin/distrib/v2022.10/funcfiftlib.js');
 const FuncFiftLibWasm_2022_10 = require('../../bin/distrib/v2022.10/funcfiftlib.wasm.js').FuncFiftLibWasm;
+const CompilerModule_2022_12 = require('../../bin/distrib/v2022.12/funcfiftlib.js');
+const FuncFiftLibWasm_2022_12 = require('../../bin/distrib/v2022.12/funcfiftlib.wasm.js').FuncFiftLibWasm;
 
 type CompileResult = {
     status: "error",
@@ -18,7 +20,7 @@ type CompileResult = {
     warnings: string
 };
 
-export async function wasmBuild(opts: { version: 'v2022.10', files: string[], stdlib: boolean, workdir: string }): Promise<CompilationResult> {
+export async function wasmBuild(opts: { version: 'v2022.10' | 'v2022.12', files: string[], stdlib: boolean, workdir: string }): Promise<CompilationResult> {
 
     // Resolve version
     let CompilerModule: any;
@@ -26,13 +28,16 @@ export async function wasmBuild(opts: { version: 'v2022.10', files: string[], st
     if (opts.version === 'v2022.10') {
         CompilerModule = CompilerModule_2022_10;
         FuncFiftLibWasm = FuncFiftLibWasm_2022_10;
+    } else if (opts.version === 'v2022.12') {
+        CompilerModule = CompilerModule_2022_12;
+        FuncFiftLibWasm = FuncFiftLibWasm_2022_12;
     } else {
         throw Error('Unknown compiler version: ' + opts.version);
     }
     const WasmBinary = base64Decode(FuncFiftLibWasm);
 
     // Create compiler
-    let mod = await CompilerModule({ wasmBinary: WasmBinary });
+    let mod = await CompilerModule({ wasmBinary: WasmBinary, printErr: (e: any) => { } });
     try {
 
         // Mount filesystem
@@ -79,13 +84,12 @@ export async function wasmBuild(opts: { version: 'v2022.10', files: string[], st
                     output: Buffer.from(result.codeBoc, 'base64')
                 };
             } else {
-                throw Error('Unexpected compiler response')
+                throw Error('Unexpected compiler response');
             }
         } finally {
             mod._free(configStrPointer);
         }
     } catch (e) {
-        throw Error('Unexpected compiler response')
-
+        throw Error('Unexpected compiler response');
     }
 }

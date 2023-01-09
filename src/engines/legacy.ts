@@ -20,18 +20,6 @@ async function createTempFile(postfix: string) {
     });
 }
 
-async function writeFile(name: string, content: string) {
-    await new Promise<void>((resolve, reject) => {
-        fs.writeFile(name, content, 'utf-8', (e) => {
-            if (e) {
-                reject(e);
-            } else {
-                resolve();
-            }
-        });
-    })
-}
-
 async function readFile(name: string) {
     return await new Promise<string>((resolve, reject) => {
         fs.readFile(name, 'utf-8', (e, d) => {
@@ -143,7 +131,6 @@ export async function legacyBuild(opts: { files: string[], stdlib: boolean, work
         }
         output = await readFileBuffer(cellFile.name);
     } catch (e) {
-        console.warn(e);
         return { ok: false, log: '', fift: fiftContent, output: null };
     } finally {
         fiftOpFile.removeCallback();
