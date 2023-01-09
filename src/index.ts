@@ -3,6 +3,7 @@ import { CompilationResult } from "./types";
 import path from 'path';
 import process from 'process';
 import { wasmBuild } from "./engines/wasm";
+import { wasmFsBuild } from "./engines/wasmFs";
 
 type Version =
     | 'v2022.10'
@@ -44,7 +45,9 @@ export async function compileContract(opts: { files: string[], version?: Version
     // Compile
     if (version === 'legacy') {
         return await legacyBuild({ files: files, stdlib, workdir });
-    } else if (version === 'v2022.10' || version === 'v2022.12') {
+    } else if (version === 'v2022.10') {
+        return await wasmFsBuild({ files: files, version, stdlib, workdir });
+    } else if (version === 'v2022.12') {
         return await wasmBuild({ files: files, version, stdlib, workdir });
     } else {
         throw Error('Unsupported compiler version ' + version);

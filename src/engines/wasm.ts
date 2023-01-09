@@ -1,4 +1,5 @@
 import path from "path";
+import fs from 'fs';
 import { CompilationResult } from "../types";
 import { base64Decode } from "./utils/base64Decode";
 import { cutFirstLine } from "./utils/cutFirstLine";
@@ -19,6 +20,21 @@ type CompileResult = {
     fiftCode: string,
     warnings: string
 };
+
+type Pointer = unknown;
+const writeToCString = (mod: any, data: string): Pointer => {
+    const len = mod.lengthBytesUTF8(data) + 1;
+    const ptr = mod._malloc(len);
+    mod.stringToUTF8(data, ptr, len);
+    return ptr;
+};
+const writeToCStringPtr = (mod: any, str: string, ptr: any) => {
+    const allocated = writeToCString(mod, str);
+    mod.setValue(ptr, allocated, '*');
+    return allocated;
+};
+
+const readFromCString = (mod: any, pointer: Pointer): string => mod.UTF8ToString(pointer);
 
 export async function wasmBuild(opts: { version: 'v2022.10' | 'v2022.12', files: string[], stdlib: boolean, workdir: string }): Promise<CompilationResult> {
 
@@ -41,10 +57,12 @@ export async function wasmBuild(opts: { version: 'v2022.10' | 'v2022.12', files:
     try {
 
         // Mount filesystem
-        mod.FS.mkdir('/libs');
-        mod.FS.mount(mod.FS.filesystems.NODEFS, { root: path.resolve(__dirname, '..', '..', 'bin', 'distrib', opts.version) }, '/libs');
-        mod.FS.mkdir('/working');
-        mod.FS.mount(mod.FS.filesystems.NODEFS, { root: opts.workdir }, '/working');
+        // mod.FS.mkdir('/libs');
+        // mod.FS.mount(mod.FS.filesystems.NODEFS, { root: path.resolve(__dirname, '..', '..', 'bin', 'distrib', opts.version) }, '/libs');
+        // mod.FS.mkdir('/working');
+        // mod.FS.mount(mod.FS.filesystems.NODEFS, { root: opts.workdir }, '/working');
+        let content: { [path: string]: { content: string } } = {};
+        content['/libs/stdlib.fc'] = { content: fs.readFileSync(path.resolve(__dirname, '..', '..', 'bin', 'distrib', opts.version, 'stdlib.fc'), 'utf-8') };
 
         // Resolve files
         let files: string[] = [];
@@ -61,13 +79,49 @@ export async function wasmBuild(opts: { version: 'v2022.10' | 'v2022.12', files:
             optLevel: 2 // compileConfig.optLevel || 2
         });
 
+        // Pointer tracking
+        const allocatedPointers: Pointer[] = [];
+        const trackPointer = (pointer: Pointer): Pointer => {
+            allocatedPointers.push(pointer);
+            return pointer;
+        };
+
         // Execute
-        let configStrPointer = mod._malloc(configStr.length + 1);
         try {
-            mod.stringToUTF8(configStr, configStrPointer, configStr.length + 1);
-            let resultPointer = mod._func_compile(configStrPointer);
-            let retJson = mod.UTF8ToString(resultPointer);
-            mod._free(resultPointer);
+            let configPointer = trackPointer(writeToCString(mod, configStr));
+            const callbackPtr = trackPointer(mod.addFunction((_kind: any, _data: any, contents: any, error: any) => {
+                const kind: string = readFromCString(mod, _kind);
+                const data: string = readFromCString(mod, _data);
+                if (kind === 'realpath') {
+                    if (data.startsWith('/libs')) {
+                        allocatedPointers.push(writeToCStringPtr(mod, path.resolve(__dirname, '..', '..', 'bin', 'distrib', opts.version, data.slice('/libs/'.length)), contents));
+                    } else if (data.startsWith('/working')) {
+                        allocatedPointers.push(writeToCStringPtr(mod, path.resolve(opts.workdir, data.slice('/working/'.length)), contents));
+                    } else {
+                        allocatedPointers.push(writeToCStringPtr(mod, data, contents));
+                    }
+                } else if (kind === 'source') {
+                    try {
+                        let pp: string;
+                        if (data.startsWith('/libs')) {
+                            pp = path.resolve(__dirname, '..', '..', 'bin', 'distrib', opts.version, data.slice('/libs/'.length));
+                        } else if (data.startsWith('/working')) {
+                            pp = path.resolve(opts.workdir, data.slice('/working/'.length));
+                        } else {
+                            throw Error('Unknown path: ' + data);
+                        }
+                        let source: string = fs.readFileSync(pp, 'utf-8');
+                        allocatedPointers.push(writeToCStringPtr(mod, source, contents));
+                    } catch (err) {
+                        const e = err as any;
+                        allocatedPointers.push(writeToCStringPtr(mod, 'message' in e ? e.message : e.toString(), error));
+                    }
+                } else {
+                    allocatedPointers.push(writeToCStringPtr(mod, 'Unknown callback kind ' + kind, error));
+                }
+            }, 'viiii'));
+            let resultPointer = trackPointer(mod._func_compile(configPointer, callbackPtr));
+            let retJson = readFromCString(mod, resultPointer);
             let result = JSON.parse(retJson) as CompileResult;
             if (result.status === 'error') {
                 return {
@@ -87,9 +141,10 @@ export async function wasmBuild(opts: { version: 'v2022.10' | 'v2022.12', files:
                 throw Error('Unexpected compiler response');
             }
         } finally {
-            mod._free(configStrPointer);
+            allocatedPointers.forEach((pointer) => mod._free(pointer));
         }
     } catch (e) {
+        console.warn(e);
         throw Error('Unexpected compiler response');
     }
 }
