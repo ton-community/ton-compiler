@@ -1,6 +1,6 @@
 {
   "name": "ton-compiler",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "TON compiler binaries",
   "main": "dist/index.js",
   "repository": "https://github.com/ton-foundation/ton-compiler.git",
