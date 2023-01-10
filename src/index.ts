@@ -15,7 +15,7 @@ export async function compileContract(opts: { files: string[], version?: Version
     // Resolve stdlib
     let stdlib = true;
     if (opts.stdlib === false) {
-        opts.stdlib = false;
+        stdlib = false;
     }
 
     // Resolve version
